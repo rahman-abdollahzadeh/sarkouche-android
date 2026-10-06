@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- simple basket silhouette -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,42h48v6h-4l-4,28h-32l-4,-28h-4z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,42c0,-10 8,-18 18,-18s18,8 18,18"
+        android:strokeWidth="4"
+        android:strokeColor="#FFFFFF"
+        android:fillType="nonZero"/>
+</vector>
