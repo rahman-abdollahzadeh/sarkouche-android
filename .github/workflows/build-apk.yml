@@ -28,16 +28,32 @@ jobs:
         with:
           packages: platform-tools platforms;android-34 build-tools;34.0.0
 
-      - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "KEYSTORE_BASE64 missing"
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d > "${GITHUB_WORKSPACE}/sarkouche-release.jks"
+          ls -la "${GITHUB_WORKSPACE}/sarkouche-release.jks"
 
-      - name: List APK
-        if: always()
-        run: find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+      - name: Build signed Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          gradle assembleRelease --no-daemon --stacktrace \
+            -Pandroid.injected.signing.store.file="${GITHUB_WORKSPACE}/sarkouche-release.jks" \
+            -Pandroid.injected.signing.store.password="${KEYSTORE_PASSWORD}" \
+            -Pandroid.injected.signing.key.alias="${KEY_ALIAS}" \
+            -Pandroid.injected.signing.key.password="${KEY_PASSWORD}"
 
-      - name: Upload APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: sarkouche-android-v1.1.0
-          path: app/build/outputs/apk/debug/*.apk
+          name: sarkouche-release-v1.1.0
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
