@@ -87,10 +87,10 @@ class MainActivity : AppCompatActivity() {
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
         settings.cacheMode = WebSettings.LOAD_DEFAULT
         settings.setGeolocationEnabled(true)
-        settings.userAgentString = settings.userAgentString + " SarkoucheApp/1.1.0"
+        settings.userAgentString = settings.userAgentString + " SarkoucheApp/1.1.1"
         // با هر نسخه اپ، کش وب یک‌بار پاک می‌شود تا آخرین سایت لود شود
         val prefs = getSharedPreferences("sk_app", MODE_PRIVATE)
-        val ver = "1.1.0"
+        val ver = "1.1.1"
         if (prefs.getString("web_cache_ver", "") != ver) {
             webView.clearCache(true)
             prefs.edit().putString("web_cache_ver", ver).apply()
@@ -190,7 +190,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         swipe.setColorSchemeResources(R.color.emerald)
-        swipe.setOnRefreshListener { webView.reload() }
+        // فقط وقتی واقعاً بالای صفحه هستیم رفرش فعال شود؛ وگرنه با اسکرول بالا تداخل دارد
+        swipe.setOnChildScrollUpCallback { _, _ -> webView.canScrollVertically(-1) }
+        swipe.setOnRefreshListener {
+            if (webView.canScrollVertically(-1)) {
+                swipe.isRefreshing = false
+            } else {
+                webView.reload()
+            }
+        }
+        // رفرش کششی عملاً مزاحم اسکرول است — خاموش
+        swipe.isEnabled = false
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
